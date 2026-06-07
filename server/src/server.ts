@@ -6,6 +6,15 @@ import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { authService } from './services/auth.service';
 
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (err: Error) => {
+  console.error('Uncaught Exception:', err);
+  console.error('Stack:', err.stack);
+});
+
 const app = express();
 
 app.use(cors());

@@ -1,15 +1,16 @@
 import { Router } from 'express';
 import { versionController } from '../controllers/version.controller';
 import { authMiddleware, roleMiddleware } from '../middleware/auth.middleware';
+import { asyncHandler } from '../middleware/async.middleware';
 
 const router = Router();
 
 router.use(authMiddleware);
 
-router.get('/', versionController.getVersions);
-router.get('/compare', versionController.compare);
-router.get('/:id', versionController.getVersion);
-router.post('/:id/rollback', roleMiddleware('admin'), versionController.rollback);
-router.post('/publish', roleMiddleware('admin', 'planner'), versionController.publish);
+router.get('/', asyncHandler(versionController.getVersions));
+router.get('/compare', asyncHandler(versionController.compare));
+router.get('/:id', asyncHandler(versionController.getVersion));
+router.post('/:id/rollback', roleMiddleware('admin'), asyncHandler(versionController.rollback));
+router.post('/publish', roleMiddleware('admin', 'planner'), asyncHandler(versionController.publish));
 
 export default router;
