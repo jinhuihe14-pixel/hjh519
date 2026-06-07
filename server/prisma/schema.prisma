@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      String   @default("planner")
+  createdAt DateTime @default(now())
+
+  @@map("users")
+}
+
+model Level {
+  id          Int         @id @default(autoincrement())
+  levelId     Int         @unique
+  name        String
+  targetScore Int
+  moves       Int
+  obstacles   Json?
+  enabled     Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  drops       LevelDrop[]
+
+  @@map("levels")
+}
+
+model LevelDrop {
+  id       Int   @id @default(autoincrement())
+  levelId  Int
+  itemId   String
+  rate     Float
+  maxDaily Int
+  level    Level @relation(fields: [levelId], references: [id], onDelete: Cascade)
+
+  @@map("level_drops")
+}
+
+model Item {
+  id          String  @id
+  name        String
+  icon        String
+  description String?
+  price       Int
+  stock       Int     @default(0)
+  category    String
+  enabled     Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("items")
+}
+
+model CheckinConfig {
+  id          Int    @id @default(autoincrement())
+  day         Int    @unique
+  rewards     Json
+  isSpecial   Boolean @default(false)
+  specialName String?
+
+  @@map("checkin_configs")
+}
+
+model GameEvent {
+  id          String        @id
+  name        String
+  type        String
+  startTime   DateTime
+  endTime     DateTime
+  status      String        @default("draft")
+  rules       Json?
+  rewards     Json?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  rewardsDetail EventReward[]
+
+  @@map("events")
+}
+
+model EventReward {
+  id      Int        @id @default(autoincrement())
+  eventId String
+  itemId  String
+  amount  Int
+  event   GameEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@map("event_rewards")
+}
+
+model Player {
+  id        String   @id
+  name      String
+  level     Int      @default(1)
+  items     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("players")
+}
+
+model Compensation {
+  id        Int      @id @default(autoincrement())
+  playerId  String
+  rewards   Json
+  reason    String
+  operator  String
+  createdAt DateTime @default(now())
+
+  @@map("compensations")
+}
+
+model ConfigVersion {
+  id        String   @id
+  version   String
+  module    String
+  data      Json
+  operator  String
+  createdAt DateTime @default(now())
+
+  @@map("config_versions")
+}
+
+model DailyStat {
+  id          Int      @id @default(autoincrement())
+  date        DateTime @unique
+  dau         Int      @default(0)
+  newUsers    Int      @default(0)
+  retentionD1 Float    @default(0)
+  retentionD7 Float    @default(0)
+  retentionD30 Float   @default(0)
+  adRevenue   Decimal  @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("daily_stats")
+}
+
+model ItemConsumption {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  itemId    String
+  itemName  String
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([date, itemId])
+  @@map("item_consumptions")
+}
